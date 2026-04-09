@@ -5,7 +5,7 @@
 Your systems already know the truth.
 They just say it in different languages.
 
-StreamTrace ingests raw machine exhaust — logs, events, traces, webhooks — and turns it into a unified, defensible timeline across systems.
+StreamTrace ingests raw machine exhaust -- logs, events, traces, webhooks -- and turns it into a unified, defensible timeline across systems.
 
 No vendor lock-in.
 No black box.
@@ -19,7 +19,7 @@ StreamTrace is not:
 
 * a SIEM
 * an observability dashboard
-* another “AI analytics platform”
+* another "AI analytics platform"
 
 StreamTrace is:
 
@@ -35,6 +35,21 @@ It answers:
 
 ---
 
+## Tech Stack
+
+| Component | Technology | Why |
+|---|---|---|
+| Backend | Rust | Memory safety, performance, zero-cost abstractions |
+| Database | PostgreSQL + TimescaleDB | Time-series hypertables, chunk pruning, full-text search |
+| Frontend | SolidJS + TypeScript | Fine-grained reactivity, small bundle, type safety |
+| Deployment | Docker Compose | Single-command setup, self-hosted, no vendor lock-in |
+| Hashing | BLAKE3 | 3x faster than SHA-256, cryptographically secure |
+| Auth | Argon2 + Bearer tokens | Timing-safe API key validation |
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed design decisions.
+
+---
+
 ## Why This Exists
 
 Most tools optimize for:
@@ -46,7 +61,7 @@ Most tools optimize for:
 
 They do not optimize for truth.
 
-When something breaks — or gets exploited — teams still:
+When something breaks -- or gets exploited -- teams still:
 
 * stitch logs manually
 * jump between tools
@@ -54,7 +69,7 @@ When something breaks — or gets exploited — teams still:
 * argue about timelines
 * fail to prove causality
 
-That’s unacceptable.
+That's unacceptable.
 
 StreamTrace exists to make reconstruction:
 
@@ -120,7 +135,7 @@ Link events by:
 Build chains like:
 
 ```
-login → token → repo access → data export
+login -> token -> repo access -> data export
 ```
 
 ---
@@ -129,7 +144,7 @@ login → token → repo access → data export
 
 The primary interface is a **global timeline**:
 
-* zoom from hours → milliseconds
+* zoom from hours to milliseconds
 * filter by entity, source, type
 * stack related events
 * pivot instantly
@@ -179,14 +194,17 @@ cd streamtrace
 ### 2. Run
 
 ```bash
+cp .env.example .env
 docker compose up
 ```
 
 ### 3. Open UI
 
 ```
-http://localhost:8080
+http://localhost:3000
 ```
+
+API is available at `http://localhost:8080`.
 
 ### 4. Send Data
 
@@ -202,7 +220,52 @@ curl -X POST http://localhost:8080/v1/ingest/events \
   }'
 ```
 
-Open the timeline. You’ll see it immediately.
+Open the timeline. You'll see it immediately.
+
+### Development Setup
+
+Prerequisites: Rust 1.75+, Node.js 22+, Docker
+
+```bash
+# Start database
+docker compose up timescaledb -d
+
+# Copy environment
+cp .env.example .env
+
+# Run migrations and start API
+cargo run --bin streamtrace
+
+# Start frontend (separate terminal)
+cd frontend && npm install && npm run dev
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development workflow.
+
+---
+
+## Architecture
+
+```
+Ingestion -> Raw Store -> Normalize -> Index -> Correlate -> Investigate
+```
+
+### Crates
+
+| Crate | Responsibility |
+|---|---|
+| `st-common` | Shared types, forensic event model, errors, config |
+| `st-crypto` | BLAKE3/SHA-256 hashing, integrity verification |
+| `st-store` | PostgreSQL/TimescaleDB access layer |
+| `st-parser` | Pluggable parser framework (JSON, CSV, syslog) |
+| `st-ingest` | Ingestion pipeline orchestration |
+| `st-index` | Timeline queries, full-text search |
+| `st-correlate` | Cross-system event correlation |
+| `st-cases` | Case management and evidence export |
+| `st-api` | REST API (axum), auth, rate limiting |
+| `st-server` | Binary entry point, config, graceful shutdown |
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the full dependency graph, database schema, and design decisions.
 
 ---
 
@@ -245,23 +308,6 @@ Build a defensible timeline with:
 
 ---
 
-## Architecture (Simplified)
-
-```
-Ingestion → Raw Store → Normalize → Index → Correlate → Investigate
-```
-
-Components:
-
-* ingest gateway
-* parser/normalizer
-* event index
-* entity graph
-* investigation API
-* dashboard UI
-
----
-
 ## Design Principles
 
 * **Truth > convenience**
@@ -277,7 +323,7 @@ Components:
 
 * Not a compliance checkbox
 * Not a dashboard farm
-* Not “AI that guesses what happened”
+* Not "AI that guesses what happened"
 * Not a replacement for every tool you have
 
 It is the layer that tells you what actually happened across them.
@@ -286,25 +332,35 @@ It is the layer that tells you what actually happened across them.
 
 ## Roadmap
 
-### Phase 1
+### Phase 1 -- Delivered
 
-* ingestion
-* timeline
-* evidence viewer
-* basic correlation
-* case export
+* Ingestion pipeline (JSON, CSV, syslog)
+* Timeline queries with cursor-based pagination
+* Evidence viewer with raw/normalized split
+* Basic correlation (identity, session, IP, device, host)
+* Case management and evidence export
 
-### Phase 2
+### Phase 2 -- Delivered
 
-* entity graph
-* sequence detection
-* replay mode
+* Entity graph (resolution, relationships, entity timeline)
+* Sequence detection (built-in and custom patterns)
+* Replay mode (SSE-based chronological event streaming)
 
-### Phase 3
+### Phase 3 -- Delivered
 
-* signed evidence bundles
-* legal hold
-* advanced correlation
+* Signed evidence bundles (Ed25519)
+* Legal hold management
+* Advanced correlation search
+* Audit logging for all security-relevant operations
+
+### Phase 4 -- Production Hardening (planned)
+
+* Horizontal scaling (stateless API nodes behind a load balancer)
+* Signing key rotation without invalidating existing bundles
+* Configurable retention policies with legal hold enforcement
+* Terraform modules for managed PostgreSQL/TimescaleDB deployments
+* Helm chart for Kubernetes deployments
+* Backup and disaster recovery runbooks
 
 ---
 
@@ -318,7 +374,7 @@ We want:
 * investigation workflows
 * performance improvements
 
-Open an issue. Ship a PR.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, standards, and workflow.
 
 ---
 
