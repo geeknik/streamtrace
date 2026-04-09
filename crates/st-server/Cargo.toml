@@ -1,0 +1,26 @@
+[package]
+name = "st-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "streamtrace"
+path = "src/main.rs"
+
+[dependencies]
+st-common = { path = "../st-common" }
+st-store = { path = "../st-store" }
+st-api = { path = "../st-api" }
+st-crypto = { path = "../st-crypto" }
+st-ingest = { path = "../st-ingest" }
+st-index = { path = "../st-index" }
+st-cases = { path = "../st-cases" }
+st-parser = { path = "../st-parser" }
+axum = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+hex = "0.4"

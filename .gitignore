@@ -1,0 +1,50 @@
+# Rust
+/target
+**/*.rs.bk
+
+# Node
+node_modules/
+frontend/dist/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Secrets
+*.pem
+*.key
+*.p12
+*.p8
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.zed/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+pgdata/
+
+# Build artifacts
+*.tar.gz
+*.stbundle
+
+# Code review graph (MCP tool state)
+.code-review-graph/
+
+# Claude Code session state
+.claude/
+
+# Coverage and profiling
+*.profraw
+*.profdata
+lcov.info
+coverage/
+tarpaulin-report.html

@@ -1,0 +1,56 @@
+# StreamTrace - Docker Compose
+# Usage: docker compose up -d
+# Requires: POSTGRES_PASSWORD set in .env or environment (defaults to dev value)
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: streamtrace
+      POSTGRES_USER: streamtrace
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-streamtrace_dev}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/timescaledb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U streamtrace -d streamtrace"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "8080:8080"
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://streamtrace:${POSTGRES_PASSWORD:-streamtrace_dev}@timescaledb:5432/streamtrace"
+      ST_ENV: development
+      RUST_LOG: debug
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ui
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:

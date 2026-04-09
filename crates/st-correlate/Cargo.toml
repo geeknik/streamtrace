@@ -1,0 +1,16 @@
+[package]
+name = "st-correlate"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+st-common = { path = "../st-common" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

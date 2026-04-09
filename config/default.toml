@@ -1,0 +1,105 @@
+# StreamTrace default configuration
+#
+# This file contains the default settings for the StreamTrace server.
+# Values here are overridden by:
+#   1. Environment-specific config (e.g., config/production.toml)
+#   2. Environment variables (prefixed with ST_)
+#   3. Command-line arguments
+#
+# For production deployments, override sensitive values via environment
+# variables rather than editing this file.
+
+[server]
+# Address to bind the HTTP server to.
+# Use "0.0.0.0" to listen on all interfaces (required in Docker).
+# Use "127.0.0.1" to restrict to localhost only.
+host = "0.0.0.0"
+
+# TCP port for the HTTP server.
+# The frontend proxies API requests to this port.
+# Must match the port exposed in docker-compose.yml.
+port = 8080
+
+# Maximum size of an HTTP request body, in bytes.
+# This is a hard limit enforced before any parsing occurs.
+# Requests exceeding this limit receive 413 Payload Too Large.
+# 10 MB = 10 * 1024 * 1024 = 10485760
+# Increase if you ingest large batch payloads. Decrease to limit
+# memory usage under adversarial conditions.
+request_body_limit_bytes = 10485760
+
+[database]
+# Maximum number of connections in the PostgreSQL connection pool.
+# Each connection consumes memory on both the application and database side.
+# Rule of thumb: set to 2-4x the number of CPU cores available to the server.
+# For TimescaleDB, keep below max_connections in postgresql.conf (default 100).
+max_connections = 20
+
+# Minimum number of idle connections kept open in the pool.
+# These connections are pre-established and ready for immediate use.
+# Set to 0 in development to minimize resource usage.
+# Set to 2-5 in production for consistent latency on first requests.
+min_connections = 2
+
+# Maximum time to wait for a database connection, in seconds.
+# If the pool is exhausted and no connection becomes available within this
+# window, the request fails with 503 Service Unavailable.
+# Keep short (3-10s) to avoid request pile-up under load.
+connect_timeout_secs = 5
+
+# Time an idle connection can sit unused before being closed, in seconds.
+# Connections older than this are dropped and replaced on demand.
+# 300 seconds = 5 minutes. Increase if your database is on a remote host
+# with expensive connection setup (TLS handshake, auth).
+idle_timeout_secs = 300
+
+[ingest]
+# Maximum number of events accepted in a single batch ingest request.
+# Larger batches improve throughput but increase memory usage per request.
+# Each event is held in memory during parsing and correlation.
+# 1000 events at 1 KB each = ~1 MB memory per batch.
+max_batch_size = 1000
+
+# Maximum size of a single event within a batch, in bytes.
+# Events exceeding this limit are rejected individually (the rest of the
+# batch proceeds). This prevents a single oversized event from consuming
+# excessive memory during parsing.
+# 1 MB = 1024 * 1024 = 1048576
+max_event_size_bytes = 1048576
+
+[security]
+# Sustained request rate limit per API key, in requests per second.
+# Uses a token bucket algorithm. Tokens refill at this rate.
+# Set based on expected legitimate traffic patterns.
+# 100 req/s is suitable for moderate ingestion workloads.
+rate_limit_per_second = 100
+
+# Maximum burst size for rate limiting.
+# Allows short bursts above the sustained rate.
+# The bucket can accumulate up to this many tokens.
+# Once exhausted, requests are throttled to rate_limit_per_second.
+# Set to 1.5-3x rate_limit_per_second for typical bursty workloads.
+rate_limit_burst = 200
+
+# CORS allowed origins.
+# Empty list = allow any origin (development only).
+# PRODUCTION: restrict to your frontend domain(s), e.g.:
+#   cors_allowed_origins = ["https://app.example.com", "https://admin.example.com"]
+cors_allowed_origins = []
+
+[logging]
+# Minimum log level. One of: trace, debug, info, warn, error
+# - trace: extremely verbose, includes per-request details
+# - debug: useful during development, includes SQL queries
+# - info: recommended for production, logs request counts and errors
+# - warn: only warnings and errors
+# - error: only errors
+# Can be overridden per-module via RUST_LOG environment variable.
+# Example: RUST_LOG=info,st_store=debug
+level = "info"
+
+# Log output format. One of: json, pretty
+# - json: structured JSON, one object per line. Use in production for
+#   log aggregation systems (Loki, Elasticsearch, CloudWatch).
+# - pretty: human-readable, colored output. Use in development.
+format = "json"

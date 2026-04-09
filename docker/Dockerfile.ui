@@ -1,0 +1,33 @@
+# StreamTrace UI - SolidJS build + nginx
+# Build context: project root (.)
+# Dockerfile path: docker/Dockerfile.ui
+
+# ---------------------------------------------------------------------------
+# Stage 1: Build the SolidJS app
+# ---------------------------------------------------------------------------
+FROM node:22-slim AS builder
+
+WORKDIR /app
+
+# Install dependencies first for layer caching
+COPY frontend/package*.json ./
+RUN npm ci --ignore-scripts
+
+# Copy frontend source and build
+COPY frontend/ .
+RUN npm run build
+
+# ---------------------------------------------------------------------------
+# Stage 2: Serve with nginx
+# ---------------------------------------------------------------------------
+FROM nginx:alpine AS runtime
+
+# Remove default nginx static content
+RUN rm -rf /usr/share/nginx/html/*
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

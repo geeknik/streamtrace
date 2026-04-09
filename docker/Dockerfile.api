@@ -1,0 +1,83 @@
+# StreamTrace API - Multi-stage Rust build
+# Produces a minimal runtime image (<100MB)
+
+# ---------------------------------------------------------------------------
+# Stage 1: Build
+# ---------------------------------------------------------------------------
+FROM rust:1.87-bookworm AS builder
+
+WORKDIR /app
+
+# Install build-time dependencies required by native crates
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        pkg-config \
+        libssl-dev \
+        protobuf-compiler && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy dependency manifests first for layer caching.
+# When only source changes, cached dependency layers are reused.
+COPY Cargo.toml Cargo.lock ./
+
+# Copy all workspace crate manifests so cargo can resolve the full
+# dependency graph before we bring in the actual source code.
+COPY crates/st-common/Cargo.toml   crates/st-common/Cargo.toml
+COPY crates/st-crypto/Cargo.toml   crates/st-crypto/Cargo.toml
+COPY crates/st-store/Cargo.toml    crates/st-store/Cargo.toml
+COPY crates/st-parser/Cargo.toml   crates/st-parser/Cargo.toml
+COPY crates/st-ingest/Cargo.toml   crates/st-ingest/Cargo.toml
+COPY crates/st-index/Cargo.toml    crates/st-index/Cargo.toml
+COPY crates/st-correlate/Cargo.toml crates/st-correlate/Cargo.toml
+COPY crates/st-cases/Cargo.toml    crates/st-cases/Cargo.toml
+COPY crates/st-api/Cargo.toml      crates/st-api/Cargo.toml
+COPY crates/st-server/Cargo.toml   crates/st-server/Cargo.toml
+
+# Create stub lib.rs for each crate so cargo can fetch + compile dependencies
+RUN for crate in st-common st-crypto st-store st-parser st-ingest \
+                  st-index st-correlate st-cases st-api st-server; do \
+        mkdir -p "crates/${crate}/src" && \
+        echo "" > "crates/${crate}/src/lib.rs"; \
+    done
+
+# Build dependencies only (this layer is cached until Cargo.toml changes)
+RUN cargo build --release --workspace 2>/dev/null || true
+
+# Now copy the real source and rebuild
+COPY crates crates
+COPY config config
+COPY migrations migrations
+
+# Touch all source files so cargo detects changes from the stubs
+RUN find crates -name "*.rs" -exec touch {} +
+
+RUN cargo build --release --bin streamtrace
+
+# ---------------------------------------------------------------------------
+# Stage 2: Minimal runtime
+# ---------------------------------------------------------------------------
+FROM debian:bookworm-slim AS runtime
+
+# Install only what the binary needs at runtime
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        libssl3 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Run as non-root
+RUN useradd -r -s /bin/false streamtrace
+
+COPY --from=builder /app/target/release/streamtrace /usr/local/bin/streamtrace
+COPY --from=builder /app/migrations /app/migrations
+COPY --from=builder /app/config    /app/config
+
+RUN chmod 0555 /usr/local/bin/streamtrace
+
+USER streamtrace
+WORKDIR /app
+
+EXPOSE 8080
+
+CMD ["streamtrace"]

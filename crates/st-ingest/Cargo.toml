@@ -1,0 +1,19 @@
+[package]
+name = "st-ingest"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+st-common = { path = "../st-common" }
+st-crypto = { path = "../st-crypto" }
+st-store = { path = "../st-store" }
+st-parser = { path = "../st-parser" }
+st-correlate = { path = "../st-correlate" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }

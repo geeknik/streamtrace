@@ -1,0 +1,39 @@
+# StreamTrace Security
+#
+# Audits Rust and Node dependencies for known vulnerabilities.
+# Runs on push to main and weekly on Monday.
+
+name: Security Audit
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"  # Monday 06:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  rust-audit:
+    name: cargo audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rustsec/audit-check@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  npm-audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm audit --audit-level=high
