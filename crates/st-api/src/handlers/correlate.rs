@@ -109,9 +109,7 @@ pub async fn correlation_chain(
     auth.require_permission(Permission::Read)?;
 
     let max_depth = params.max_depth.clamp(1, MAX_CHAIN_DEPTH);
-    let time_window = params
-        .time_window_secs
-        .clamp(1, MAX_TIME_WINDOW_SECS);
+    let time_window = params.time_window_secs.clamp(1, MAX_TIME_WINDOW_SECS);
     let half_window = Duration::seconds(time_window as i64 / 2);
 
     // 1. Get the seed event.

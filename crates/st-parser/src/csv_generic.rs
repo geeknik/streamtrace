@@ -7,9 +7,7 @@ use chrono::{DateTime, Utc};
 use std::io::Cursor;
 
 use st_common::error::StError;
-use st_common::event::{
-    Actor, CorrelationKey, CorrelationKeyType, DeviceContext, NetworkContext,
-};
+use st_common::event::{Actor, CorrelationKey, CorrelationKeyType, DeviceContext, NetworkContext};
 use st_common::types::Severity;
 
 use crate::traits::{EventParser, ParsedEvent};
@@ -97,11 +95,7 @@ impl EventParser for CsvGenericParser {
         content_type == "text/csv" || content_type == "application/csv"
     }
 
-    fn parse(
-        &self,
-        content: &[u8],
-        _content_type: &str,
-    ) -> Result<Vec<ParsedEvent>, StError> {
+    fn parse(&self, content: &[u8], _content_type: &str) -> Result<Vec<ParsedEvent>, StError> {
         if content.is_empty() {
             return Err(StError::ParseError("empty CSV input".to_string()));
         }
@@ -130,8 +124,8 @@ impl EventParser for CsvGenericParser {
         let mut events = Vec::new();
 
         for result in reader.records() {
-            let record = result
-                .map_err(|e| StError::ParseError(format!("malformed CSV row: {}", e)))?;
+            let record =
+                result.map_err(|e| StError::ParseError(format!("malformed CSV row: {}", e)))?;
 
             let mut event_type: Option<String> = None;
             let mut occurred_at_str: Option<String> = None;
@@ -297,9 +291,18 @@ mod tests {
         );
 
         // Correlation hints
-        assert!(e.correlation_hints.iter().any(|h| h.key_type == CorrelationKeyType::Identity && h.key_value == "alice"));
-        assert!(e.correlation_hints.iter().any(|h| h.key_type == CorrelationKeyType::Ip && h.key_value == "10.0.0.1"));
-        assert!(e.correlation_hints.iter().any(|h| h.key_type == CorrelationKeyType::Host && h.key_value == "web-01"));
+        assert!(e
+            .correlation_hints
+            .iter()
+            .any(|h| h.key_type == CorrelationKeyType::Identity && h.key_value == "alice"));
+        assert!(e
+            .correlation_hints
+            .iter()
+            .any(|h| h.key_type == CorrelationKeyType::Ip && h.key_value == "10.0.0.1"));
+        assert!(e
+            .correlation_hints
+            .iter()
+            .any(|h| h.key_type == CorrelationKeyType::Host && h.key_value == "web-01"));
     }
 
     #[test]
@@ -367,8 +370,17 @@ mod tests {
         assert_eq!(e.event_type, "login");
         assert_eq!(e.severity, Severity::Medium);
         assert_eq!(e.actor.as_ref().unwrap().id.as_deref(), Some("bob"));
-        assert_eq!(e.network.as_ref().unwrap().src_ip.as_deref(), Some("1.2.3.4"));
-        assert_eq!(e.network.as_ref().unwrap().dst_ip.as_deref(), Some("5.6.7.8"));
-        assert_eq!(e.device.as_ref().unwrap().hostname.as_deref(), Some("srv-1"));
+        assert_eq!(
+            e.network.as_ref().unwrap().src_ip.as_deref(),
+            Some("1.2.3.4")
+        );
+        assert_eq!(
+            e.network.as_ref().unwrap().dst_ip.as_deref(),
+            Some("5.6.7.8")
+        );
+        assert_eq!(
+            e.device.as_ref().unwrap().hostname.as_deref(),
+            Some("srv-1")
+        );
     }
 }

@@ -33,14 +33,16 @@ pub fn cors_layer(allowed_origins: &[String]) -> CorsLayer {
         let values: Vec<HeaderValue> = allowed_origins
             .iter()
             .filter_map(|origin| {
-                HeaderValue::from_str(origin).map_err(|e| {
-                    tracing::warn!(
-                        origin = %origin,
-                        error = %e,
-                        "skipping invalid CORS origin"
-                    );
-                    e
-                }).ok()
+                HeaderValue::from_str(origin)
+                    .map_err(|e| {
+                        tracing::warn!(
+                            origin = %origin,
+                            error = %e,
+                            "skipping invalid CORS origin"
+                        );
+                        e
+                    })
+                    .ok()
             })
             .collect();
 
@@ -73,7 +75,9 @@ pub fn body_limit_layer(max_bytes: usize) -> RequestBodyLimitLayer {
 /// Build a request tracing layer using tower-http.
 ///
 /// Logs method, URI, status, and latency for every request.
-pub fn trace_layer() -> TraceLayer<tower_http::classify::SharedClassifier<tower_http::classify::ServerErrorsAsFailures>> {
+pub fn trace_layer(
+) -> TraceLayer<tower_http::classify::SharedClassifier<tower_http::classify::ServerErrorsAsFailures>>
+{
     TraceLayer::new_for_http()
 }
 

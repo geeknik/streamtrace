@@ -64,11 +64,7 @@ pub async fn search(
         offset: params.offset,
     };
 
-    let result = state
-        .index
-        .search(&query)
-        .await
-        .map_err(ApiError::from)?;
+    let result = state.index.search(&query).await.map_err(ApiError::from)?;
 
     Ok(axum::Json(result))
 }

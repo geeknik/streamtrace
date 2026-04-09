@@ -65,9 +65,5 @@ pub trait EventParser: Send + Sync {
     ///
     /// Returns an empty `Vec` if the content is valid but contains no events.
     /// Returns `Err(StError::ParseError(..))` on malformed input.
-    fn parse(
-        &self,
-        content: &[u8],
-        content_type: &str,
-    ) -> Result<Vec<ParsedEvent>, StError>;
+    fn parse(&self, content: &[u8], content_type: &str) -> Result<Vec<ParsedEvent>, StError>;
 }

@@ -140,9 +140,7 @@ impl FromRequestParts<AppState> for AuthenticatedKey {
 /// parameters, salt, and hash. This is the value stored in `key_hash`.
 ///
 /// This function should be called when creating a new API key.
-pub fn hash_api_key_token(
-    token: &str,
-) -> Result<String, argon2::password_hash::Error> {
+pub fn hash_api_key_token(token: &str) -> Result<String, argon2::password_hash::Error> {
     use argon2::password_hash::{rand_core::OsRng, PasswordHasher, SaltString};
     use argon2::Argon2;
 

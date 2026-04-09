@@ -28,11 +28,7 @@ pub fn validate_body_size(body: &[u8], max_bytes: usize) -> Result<(), StError> 
 /// Returns `StError::Validation` if `count` exceeds `max_batch`.
 pub fn validate_batch_size(count: usize, max_batch: usize) -> Result<(), StError> {
     if count > max_batch {
-        tracing::warn!(
-            batch_size = count,
-            max_batch,
-            "batch size exceeds limit"
-        );
+        tracing::warn!(batch_size = count, max_batch, "batch size exceeds limit");
         return Err(StError::Validation(format!(
             "batch contains {count} events, maximum is {max_batch}"
         )));

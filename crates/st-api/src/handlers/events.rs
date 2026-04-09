@@ -29,11 +29,7 @@ pub async fn get_event(
 ) -> Result<impl IntoResponse, ApiError> {
     auth.require_permission(Permission::Read)?;
 
-    let event = state
-        .db
-        .get_event(id)
-        .await
-        .map_err(ApiError::from)?;
+    let event = state.db.get_event(id).await.map_err(ApiError::from)?;
 
     Ok(axum::Json(event))
 }
@@ -80,11 +76,7 @@ pub async fn get_event_raw(
     auth.require_permission(Permission::Read)?;
 
     // Get the normalized event to find the raw_event_id.
-    let event = state
-        .db
-        .get_event(id)
-        .await
-        .map_err(ApiError::from)?;
+    let event = state.db.get_event(id).await.map_err(ApiError::from)?;
 
     let raw = state
         .db
@@ -163,11 +155,7 @@ pub async fn get_correlated_events(
     let limit = params.limit.clamp(1, 1000);
 
     // Get the source event.
-    let event = state
-        .db
-        .get_event(id)
-        .await
-        .map_err(ApiError::from)?;
+    let event = state.db.get_event(id).await.map_err(ApiError::from)?;
 
     // Extract correlation keys from the event.
     let keys = extract_correlation_keys(&event);

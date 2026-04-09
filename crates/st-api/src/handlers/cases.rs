@@ -154,11 +154,7 @@ pub async fn get_case(
 ) -> Result<impl IntoResponse, ApiError> {
     auth.require_permission(Permission::Read)?;
 
-    let case = state
-        .cases
-        .get_case(id)
-        .await
-        .map_err(ApiError::from)?;
+    let case = state.cases.get_case(id).await.map_err(ApiError::from)?;
 
     Ok(Json(case))
 }
@@ -271,12 +267,7 @@ pub async fn update_case_event(
 
     let case_event = state
         .cases
-        .update_event(
-            case_id,
-            event_id,
-            req.pinned,
-            req.annotation.as_deref(),
-        )
+        .update_event(case_id, event_id, req.pinned, req.annotation.as_deref())
         .await
         .map_err(ApiError::from)?;
 
@@ -296,8 +287,7 @@ pub async fn export_case(
 ) -> Result<impl IntoResponse, ApiError> {
     auth.require_permission(Permission::Read)?;
 
-    let format = ExportFormat::from_str_checked(&params.format)
-        .map_err(ApiError::from)?;
+    let format = ExportFormat::from_str_checked(&params.format).map_err(ApiError::from)?;
 
     let content = state
         .cases

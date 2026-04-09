@@ -250,12 +250,10 @@ pub async fn build_evidence_bundle(
         }
 
         // Serialize event to JSON
-        let event_json = serde_json::to_value(&event).map_err(|e| {
-            StError::Internal(format!("failed to serialize event: {e}"))
-        })?;
-        let event_bytes = serde_json::to_vec(&event_json).map_err(|e| {
-            StError::Internal(format!("failed to serialize event bytes: {e}"))
-        })?;
+        let event_json = serde_json::to_value(&event)
+            .map_err(|e| StError::Internal(format!("failed to serialize event: {e}")))?;
+        let event_bytes = serde_json::to_vec(&event_json)
+            .map_err(|e| StError::Internal(format!("failed to serialize event bytes: {e}")))?;
 
         // File integrity for this event
         let event_hash = hash_blake3(&event_bytes);
@@ -338,9 +336,8 @@ pub async fn build_evidence_bundle(
     };
 
     // 4. Manifest integrity
-    let manifest_bytes = serde_json::to_vec(&manifest).map_err(|e| {
-        StError::Internal(format!("failed to serialize manifest: {e}"))
-    })?;
+    let manifest_bytes = serde_json::to_vec(&manifest)
+        .map_err(|e| StError::Internal(format!("failed to serialize manifest: {e}")))?;
     let manifest_hash = hash_blake3(&manifest_bytes);
     integrity.push(FileIntegrity {
         path: "manifest.json".to_string(),
@@ -361,9 +358,8 @@ pub async fn build_evidence_bundle(
     };
 
     // 6. Sign the chain
-    let chain_json = serde_json::to_vec(&chain).map_err(|e| {
-        StError::Internal(format!("failed to serialize chain: {e}"))
-    })?;
+    let chain_json = serde_json::to_vec(&chain)
+        .map_err(|e| StError::Internal(format!("failed to serialize chain: {e}")))?;
     let signature = signing_key.sign(&chain_json);
     let public_key = signing_key.public_key_info();
 
@@ -406,8 +402,17 @@ pub fn verify_bundle(bundle: &EvidenceBundle) -> BundleVerification {
     }
 
     // 2. Verify that the integrity file_hashes match the chain's file_hashes
-    let integrity_hashes: Vec<&str> = bundle.integrity.iter().map(|fi| fi.hash_hex.as_str()).collect();
-    let chain_hashes: Vec<&str> = bundle.chain.file_hashes.iter().map(|h| h.as_str()).collect();
+    let integrity_hashes: Vec<&str> = bundle
+        .integrity
+        .iter()
+        .map(|fi| fi.hash_hex.as_str())
+        .collect();
+    let chain_hashes: Vec<&str> = bundle
+        .chain
+        .file_hashes
+        .iter()
+        .map(|h| h.as_str())
+        .collect();
 
     if integrity_hashes != chain_hashes {
         integrity_valid = false;
@@ -446,14 +451,15 @@ pub fn verify_bundle(bundle: &EvidenceBundle) -> BundleVerification {
 
     // 4. Verify raw event content hashes
     for (i, raw_entry) in bundle.raw_events.iter().enumerate() {
-        let raw_bytes = match base64::engine::general_purpose::STANDARD.decode(&raw_entry.content_base64) {
-            Ok(b) => b,
-            Err(e) => {
-                integrity_valid = false;
-                details.push(format!("failed to decode raw event {i} base64: {e}"));
-                continue;
-            }
-        };
+        let raw_bytes =
+            match base64::engine::general_purpose::STANDARD.decode(&raw_entry.content_base64) {
+                Ok(b) => b,
+                Err(e) => {
+                    integrity_valid = false;
+                    details.push(format!("failed to decode raw event {i} base64: {e}"));
+                    continue;
+                }
+            };
 
         let computed = hash_blake3(&raw_bytes);
         if computed.hex_digest != raw_entry.content_hash {
@@ -616,7 +622,10 @@ mod tests {
         });
 
         let result = verify_bundle(&bundle);
-        assert!(!result.integrity_valid, "tampered event should fail integrity");
+        assert!(
+            !result.integrity_valid,
+            "tampered event should fail integrity"
+        );
     }
 
     #[test]
@@ -649,7 +658,10 @@ mod tests {
         bundle.chain.root_hash = root.hex_digest;
 
         let result = verify_bundle(&bundle);
-        assert!(!result.signature_valid, "tampered chain should invalidate signature");
+        assert!(
+            !result.signature_valid,
+            "tampered chain should invalidate signature"
+        );
     }
 
     #[test]
@@ -661,7 +673,10 @@ mod tests {
             base64::engine::general_purpose::STANDARD.encode(b"tampered content");
 
         let result = verify_bundle(&bundle);
-        assert!(!result.integrity_valid, "tampered raw event should fail integrity");
+        assert!(
+            !result.integrity_valid,
+            "tampered raw event should fail integrity"
+        );
     }
 
     #[test]
@@ -736,7 +751,11 @@ mod tests {
         assert_eq!(bundle.manifest.bundle_version, "1.0");
         assert_eq!(bundle.manifest.event_count, 1);
         assert!(bundle.manifest.time_range.is_some());
-        assert!(bundle.manifest.generator.starts_with("StreamTrace v"), "generator should include version: {}", bundle.manifest.generator);
+        assert!(
+            bundle.manifest.generator.starts_with("StreamTrace v"),
+            "generator should include version: {}",
+            bundle.manifest.generator
+        );
     }
 
     #[test]

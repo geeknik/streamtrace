@@ -24,10 +24,7 @@ pub async fn healthz() -> impl IntoResponse {
 /// this check.
 pub async fn readyz(State(state): State<AppState>) -> impl IntoResponse {
     match state.db.health_check().await {
-        Ok(()) => (
-            StatusCode::OK,
-            axum::Json(json!({ "status": "ok" })),
-        ),
+        Ok(()) => (StatusCode::OK, axum::Json(json!({ "status": "ok" }))),
         Err(_) => (
             StatusCode::SERVICE_UNAVAILABLE,
             axum::Json(json!({ "status": "unavailable" })),

@@ -114,6 +114,9 @@ mod tests {
     fn error_messages_include_field_name() {
         let err = validate_not_empty("source_id", "").unwrap_err();
         let msg = err.to_string();
-        assert!(msg.contains("source_id"), "error should name the field: {msg}");
+        assert!(
+            msg.contains("source_id"),
+            "error should name the field: {msg}"
+        );
     }
 }

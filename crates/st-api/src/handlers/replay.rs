@@ -104,7 +104,11 @@ pub async fn replay(
     };
 
     // Fetch events upfront. The limit cap at 10k keeps memory bounded.
-    let result = state.db.query_timeline(&query).await.map_err(ApiError::from)?;
+    let result = state
+        .db
+        .query_timeline(&query)
+        .await
+        .map_err(ApiError::from)?;
     let events = result.events;
 
     tracing::info!(
@@ -163,7 +167,8 @@ pub async fn replay(
         yield Ok::<_, Infallible>(done_event);
     };
 
-    Ok(Sse::new(stream).keep_alive(KeepAlive::new().interval(
-        tokio::time::Duration::from_secs(15),
-    )))
+    Ok(
+        Sse::new(stream)
+            .keep_alive(KeepAlive::new().interval(tokio::time::Duration::from_secs(15))),
+    )
 }

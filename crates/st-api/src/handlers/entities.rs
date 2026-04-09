@@ -124,11 +124,7 @@ pub async fn get_entity(
 ) -> Result<impl IntoResponse, ApiError> {
     auth.require_permission(Permission::Read)?;
 
-    let entity = state
-        .db
-        .get_entity(id)
-        .await
-        .map_err(ApiError::from)?;
+    let entity = state.db.get_entity(id).await.map_err(ApiError::from)?;
 
     let relationships = state
         .db

@@ -162,11 +162,7 @@ pub async fn get_hold(
 ) -> Result<impl IntoResponse, ApiError> {
     auth.require_permission(Permission::Read)?;
 
-    let hold = state
-        .cases
-        .get_hold(id)
-        .await
-        .map_err(ApiError::from)?;
+    let hold = state.cases.get_hold(id).await.map_err(ApiError::from)?;
 
     let event_count = state
         .cases
@@ -190,11 +186,7 @@ pub async fn release_hold(
 ) -> Result<impl IntoResponse, ApiError> {
     auth.require_permission(Permission::Write)?;
 
-    let hold = state
-        .cases
-        .release_hold(id)
-        .await
-        .map_err(ApiError::from)?;
+    let hold = state.cases.release_hold(id).await.map_err(ApiError::from)?;
 
     // Fire-and-forget audit log.
     {
@@ -245,11 +237,7 @@ pub async fn materialize_hold(
 ) -> Result<impl IntoResponse, ApiError> {
     auth.require_permission(Permission::Write)?;
 
-    let hold = state
-        .cases
-        .get_hold(id)
-        .await
-        .map_err(ApiError::from)?;
+    let hold = state.cases.get_hold(id).await.map_err(ApiError::from)?;
 
     if hold.status != "active" {
         return Err(ApiError::from(StError::Validation(
@@ -354,9 +342,9 @@ pub async fn materialize_hold(
                     StError::Validation("criteria.case_id is required for case holds".into())
                 })?;
 
-            let case_id: Uuid = case_id_str.parse().map_err(|_| {
-                StError::Validation("criteria.case_id must be a valid UUID".into())
-            })?;
+            let case_id: Uuid = case_id_str
+                .parse()
+                .map_err(|_| StError::Validation("criteria.case_id must be a valid UUID".into()))?;
 
             // Execute the case event lookup and hold insertion in a transaction.
             let mut tx = state.db.begin().await.map_err(ApiError::from)?;

@@ -161,13 +161,7 @@ impl Database {
         let (object_id, object_name, object_type) = event
             .object
             .as_ref()
-            .map(|o| {
-                (
-                    o.id.as_deref(),
-                    o.name.as_deref(),
-                    o.object_type.as_deref(),
-                )
-            })
+            .map(|o| (o.id.as_deref(), o.name.as_deref(), o.object_type.as_deref()))
             .unwrap_or((None, None, None));
 
         let (src_ip, dst_ip, src_port, dst_port, protocol) = event
@@ -336,10 +330,7 @@ impl Database {
         };
 
         // Event types filter.
-        let has_event_types = params
-            .event_types
-            .as_ref()
-            .is_some_and(|v| !v.is_empty());
+        let has_event_types = params.event_types.as_ref().is_some_and(|v| !v.is_empty());
         if has_event_types {
             conditions.push(format!("event_type = ANY(${param_idx})"));
             param_idx += 1;
@@ -456,16 +447,9 @@ impl Database {
         let rows = query.fetch_all(&self.pool).await.map_err(map_sqlx_err)?;
 
         let has_more = rows.len() > limit as usize;
-        let take = if has_more {
-            limit as usize
-        } else {
-            rows.len()
-        };
+        let take = if has_more { limit as usize } else { rows.len() };
 
-        let events: Vec<ForensicEvent> = rows[..take]
-            .iter()
-            .map(forensic_event_from_row)
-            .collect();
+        let events: Vec<ForensicEvent> = rows[..take].iter().map(forensic_event_from_row).collect();
 
         let next_cursor = if has_more {
             events.last().map(|e| encode_cursor(&e.occurred_at, &e.id))
@@ -525,10 +509,7 @@ impl Database {
 ///
 /// Identical SQL to [`Database::insert_event`] but executes against the
 /// provided transaction handle instead of the connection pool.
-pub async fn insert_event_tx(
-    tx: &mut Transaction<'_>,
-    event: &ForensicEvent,
-) -> StResult<EventId> {
+pub async fn insert_event_tx(tx: &mut Transaction<'_>, event: &ForensicEvent) -> StResult<EventId> {
     let severity_val = severity_to_i16(event.severity);
     let tags: Vec<&str> = event.tags.iter().map(|s| s.as_str()).collect();
 
@@ -553,13 +534,7 @@ pub async fn insert_event_tx(
     let (object_id, object_name, object_type) = event
         .object
         .as_ref()
-        .map(|o| {
-            (
-                o.id.as_deref(),
-                o.name.as_deref(),
-                o.object_type.as_deref(),
-            )
-        })
+        .map(|o| (o.id.as_deref(), o.name.as_deref(), o.object_type.as_deref()))
         .unwrap_or((None, None, None));
 
     let (src_ip, dst_ip, src_port, dst_port, protocol) = event

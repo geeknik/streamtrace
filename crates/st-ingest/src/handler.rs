@@ -135,10 +135,7 @@ pub fn normalize(
 ///
 /// Combines keys extracted from the event structure with any
 /// correlation hints the parser provided.
-pub fn extract_keys(
-    event: &ForensicEvent,
-    parser_hints: &[CorrelationKey],
-) -> Vec<CorrelationKey> {
+pub fn extract_keys(event: &ForensicEvent, parser_hints: &[CorrelationKey]) -> Vec<CorrelationKey> {
     let mut keys = extract_correlation_keys(event);
 
     // Merge parser-provided hints, deduplicating by (type, value).
@@ -297,8 +294,7 @@ pub async fn resolve_entities_tx(
             entity_uuid,
         );
 
-        link_entity_event_tx(tx, entity_uuid, event_id, &observed.role, event.occurred_at)
-            .await?;
+        link_entity_event_tx(tx, entity_uuid, event_id, &observed.role, event.occurred_at).await?;
     }
 
     for rel in &relationships {

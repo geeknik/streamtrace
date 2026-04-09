@@ -454,7 +454,10 @@ mod tests {
         assert_eq!(deserialized.id, event.id);
         assert_eq!(deserialized.event_type, event.event_type);
         assert_eq!(deserialized.severity, event.severity);
-        assert_eq!(deserialized.actor.as_ref().unwrap().id, Some("u-42".to_string()));
+        assert_eq!(
+            deserialized.actor.as_ref().unwrap().id,
+            Some("u-42".to_string())
+        );
         assert_eq!(deserialized.tags, vec!["test".to_string()]);
     }
 
@@ -525,7 +528,10 @@ mod tests {
         };
         let json = serde_json::to_string(&key).expect("serialize");
         let parsed: CorrelationKey = serde_json::from_str(&json).expect("deserialize");
-        assert_eq!(parsed.key_type, CorrelationKeyType::Custom("tenant".to_string()));
+        assert_eq!(
+            parsed.key_type,
+            CorrelationKeyType::Custom("tenant".to_string())
+        );
         assert_eq!(parsed.key_value, "t-100");
 
         // Standard variants use snake_case

@@ -45,7 +45,6 @@ pub struct LegalHold {
 // Pagination constants
 // ---------------------------------------------------------------------------
 
-
 /// Maximum number of holds returned by `list_holds`.
 const MAX_LIST_HOLDS_LIMIT: u32 = 1000;
 
@@ -131,11 +130,7 @@ impl Database {
     ///
     /// Returns holds ordered by most recently created first. The `limit`
     /// parameter is clamped to [1, 1000] with a default of 100.
-    pub async fn list_holds(
-        &self,
-        status: Option<&str>,
-        limit: u32,
-    ) -> StResult<Vec<LegalHold>> {
+    pub async fn list_holds(&self, status: Option<&str>, limit: u32) -> StResult<Vec<LegalHold>> {
         let clamped = limit.clamp(1, MAX_LIST_HOLDS_LIMIT) as i64;
 
         let rows = if let Some(st) = status {
@@ -198,13 +193,11 @@ impl Database {
             Some(row) => Ok(hold_from_row(&row)),
             None => {
                 // Distinguish between not found and already released
-                let exists = sqlx::query(
-                    "SELECT status FROM legal_holds WHERE id = $1",
-                )
-                .bind(id)
-                .fetch_optional(self.pool())
-                .await
-                .map_err(map_sqlx_err)?;
+                let exists = sqlx::query("SELECT status FROM legal_holds WHERE id = $1")
+                    .bind(id)
+                    .fetch_optional(self.pool())
+                    .await
+                    .map_err(map_sqlx_err)?;
 
                 match exists {
                     Some(row) => {
@@ -223,11 +216,7 @@ impl Database {
     ///
     /// Each tuple is `(event_id, raw_event_id)`. Returns the number of
     /// rows inserted. Duplicate entries are silently skipped.
-    pub async fn add_hold_events(
-        &self,
-        hold_id: Uuid,
-        events: &[(Uuid, Uuid)],
-    ) -> StResult<usize> {
+    pub async fn add_hold_events(&self, hold_id: Uuid, events: &[(Uuid, Uuid)]) -> StResult<usize> {
         if events.is_empty() {
             return Ok(0);
         }

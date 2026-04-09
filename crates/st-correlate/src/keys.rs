@@ -163,8 +163,9 @@ mod tests {
         //         Session(sess-abc), Token(tok-xyz)
         assert_eq!(keys.len(), 7);
 
-        assert!(keys.iter().any(|k| k.key_type == CorrelationKeyType::Identity
-            && k.key_value == "user-42"));
+        assert!(keys
+            .iter()
+            .any(|k| k.key_type == CorrelationKeyType::Identity && k.key_value == "user-42"));
         assert!(keys
             .iter()
             .any(|k| k.key_type == CorrelationKeyType::Ip && k.key_value == "10.0.0.1"));
@@ -174,9 +175,9 @@ mod tests {
         assert!(keys
             .iter()
             .any(|k| k.key_type == CorrelationKeyType::Device && k.key_value == "dev-99"));
-        assert!(keys.iter().any(
-            |k| k.key_type == CorrelationKeyType::Host && k.key_value == "ws-a.corp.local"
-        ));
+        assert!(keys
+            .iter()
+            .any(|k| k.key_type == CorrelationKeyType::Host && k.key_value == "ws-a.corp.local"));
         assert!(keys
             .iter()
             .any(|k| k.key_type == CorrelationKeyType::Session && k.key_value == "sess-abc"));

@@ -57,10 +57,7 @@ pub struct SearchResult {
 ///
 /// This function is internal to the crate; the public API is
 /// [`EventIndex::search`](crate::EventIndex::search).
-pub(crate) async fn execute_search(
-    db: &Database,
-    query: &SearchQuery,
-) -> StResult<SearchResult> {
+pub(crate) async fn execute_search(db: &Database, query: &SearchQuery) -> StResult<SearchResult> {
     let sanitized = sanitize_search_query(&query.query);
     if sanitized.is_empty() {
         return Err(StError::Validation(

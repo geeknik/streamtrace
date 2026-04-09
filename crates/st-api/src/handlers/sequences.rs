@@ -141,8 +141,7 @@ pub async fn list_patterns(
     // Add stored patterns.
     for sp in stored {
         // Try to deserialize the definition to extract steps.
-        let parsed: Option<SequencePattern> =
-            serde_json::from_value(sp.definition.clone()).ok();
+        let parsed: Option<SequencePattern> = serde_json::from_value(sp.definition.clone()).ok();
 
         entries.push(PatternEntry {
             id: Some(sp.id),

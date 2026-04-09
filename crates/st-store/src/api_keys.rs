@@ -61,7 +61,10 @@ fn permission_from_str(s: &str) -> Option<Permission> {
 }
 
 fn permissions_from_strings(strings: &[String]) -> Vec<Permission> {
-    strings.iter().filter_map(|s| permission_from_str(s)).collect()
+    strings
+        .iter()
+        .filter_map(|s| permission_from_str(s))
+        .collect()
 }
 
 // ---------------------------------------------------------------------------

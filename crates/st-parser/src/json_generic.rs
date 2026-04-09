@@ -279,11 +279,7 @@ impl EventParser for JsonGenericParser {
         matches!(trimmed, Some(b'{') | Some(b'['))
     }
 
-    fn parse(
-        &self,
-        content: &[u8],
-        _content_type: &str,
-    ) -> Result<Vec<ParsedEvent>, StError> {
+    fn parse(&self, content: &[u8], _content_type: &str) -> Result<Vec<ParsedEvent>, StError> {
         if content.is_empty() {
             return Err(StError::ParseError("empty input".to_string()));
         }
@@ -321,7 +317,9 @@ mod tests {
     #[test]
     fn parse_minimal_event() {
         let input = r#"{"event_type":"auth.login","occurred_at":"2026-04-09T12:00:00Z"}"#;
-        let events = parser().parse(input.as_bytes(), "application/json").unwrap();
+        let events = parser()
+            .parse(input.as_bytes(), "application/json")
+            .unwrap();
         assert_eq!(events.len(), 1);
         assert_eq!(events[0].event_type, "auth.login");
         assert_eq!(events[0].severity, Severity::Info);
@@ -344,7 +342,9 @@ mod tests {
             "tags": ["vpn", "suspicious"],
             "custom_field_1": "extra_value"
         }"#;
-        let events = parser().parse(input.as_bytes(), "application/json").unwrap();
+        let events = parser()
+            .parse(input.as_bytes(), "application/json")
+            .unwrap();
         assert_eq!(events.len(), 1);
         let e = &events[0];
         assert_eq!(e.event_type, "file.access");
@@ -377,15 +377,29 @@ mod tests {
 
         // Extra fields captured
         assert_eq!(
-            e.custom_fields.get("custom_field_1").and_then(|v| v.as_str()),
+            e.custom_fields
+                .get("custom_field_1")
+                .and_then(|v| v.as_str()),
             Some("extra_value")
         );
 
         // Correlation hints: identity, ip, device, host
-        assert!(e.correlation_hints.iter().any(|h| h.key_type == CorrelationKeyType::Identity && h.key_value == "alice"));
-        assert!(e.correlation_hints.iter().any(|h| h.key_type == CorrelationKeyType::Ip && h.key_value == "203.0.113.10"));
-        assert!(e.correlation_hints.iter().any(|h| h.key_type == CorrelationKeyType::Device && h.key_value == "dev-001"));
-        assert!(e.correlation_hints.iter().any(|h| h.key_type == CorrelationKeyType::Host && h.key_value == "alice-laptop"));
+        assert!(e
+            .correlation_hints
+            .iter()
+            .any(|h| h.key_type == CorrelationKeyType::Identity && h.key_value == "alice"));
+        assert!(e
+            .correlation_hints
+            .iter()
+            .any(|h| h.key_type == CorrelationKeyType::Ip && h.key_value == "203.0.113.10"));
+        assert!(e
+            .correlation_hints
+            .iter()
+            .any(|h| h.key_type == CorrelationKeyType::Device && h.key_value == "dev-001"));
+        assert!(e
+            .correlation_hints
+            .iter()
+            .any(|h| h.key_type == CorrelationKeyType::Host && h.key_value == "alice-laptop"));
     }
 
     #[test]
@@ -394,7 +408,9 @@ mod tests {
             {"event_type":"a","occurred_at":"2026-04-09T12:00:00Z"},
             {"event_type":"b","occurred_at":"2026-04-09T12:01:00Z"}
         ]"#;
-        let events = parser().parse(input.as_bytes(), "application/json").unwrap();
+        let events = parser()
+            .parse(input.as_bytes(), "application/json")
+            .unwrap();
         assert_eq!(events.len(), 2);
         assert_eq!(events[0].event_type, "a");
         assert_eq!(events[1].event_type, "b");
@@ -403,7 +419,9 @@ mod tests {
     #[test]
     fn parse_missing_optional_fields_defaults() {
         let input = r#"{"event_type":"test","occurred_at":"2026-04-09T12:00:00Z"}"#;
-        let events = parser().parse(input.as_bytes(), "application/json").unwrap();
+        let events = parser()
+            .parse(input.as_bytes(), "application/json")
+            .unwrap();
         let e = &events[0];
         assert_eq!(e.severity, Severity::Info);
         assert!(e.observed_at.is_none());

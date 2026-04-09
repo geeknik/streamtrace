@@ -41,7 +41,6 @@ pub struct CaseEvent {
 // Pagination constants
 // ---------------------------------------------------------------------------
 
-
 /// Maximum number of cases returned by `list_cases`.
 const MAX_LIST_CASES_LIMIT: u32 = 1000;
 
@@ -160,11 +159,7 @@ impl Database {
     ///
     /// Returns cases ordered by most recently updated first. The `limit`
     /// parameter is clamped to [1, 1000] with a default of 100.
-    pub async fn list_cases(
-        &self,
-        status: Option<CaseStatus>,
-        limit: u32,
-    ) -> StResult<Vec<Case>> {
+    pub async fn list_cases(&self, status: Option<CaseStatus>, limit: u32) -> StResult<Vec<Case>> {
         let clamped = limit.clamp(1, MAX_LIST_CASES_LIMIT) as i64;
 
         let rows = if let Some(st) = status {
@@ -274,11 +269,7 @@ impl Database {
     /// Removes an event from a case.
     ///
     /// Returns `StError::NotFound` if the combination does not exist.
-    pub async fn remove_event_from_case(
-        &self,
-        case_id: CaseId,
-        event_id: EventId,
-    ) -> StResult<()> {
+    pub async fn remove_event_from_case(&self, case_id: CaseId, event_id: EventId) -> StResult<()> {
         let result = sqlx::query(
             r#"
             DELETE FROM case_events

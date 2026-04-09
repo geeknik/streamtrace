@@ -78,9 +78,9 @@ impl ParserRegistry {
         parser_id: Option<&str>,
     ) -> Result<Vec<ParsedEvent>, StError> {
         let parser = match parser_id {
-            Some(id) => self.get_by_id(id).ok_or_else(|| {
-                StError::ParseError(format!("unknown parser: {}", id))
-            })?,
+            Some(id) => self
+                .get_by_id(id)
+                .ok_or_else(|| StError::ParseError(format!("unknown parser: {}", id)))?,
             None => self.detect_parser(content, content_type).ok_or_else(|| {
                 StError::ParseError(format!(
                     "no parser found for content type '{}'",
@@ -119,9 +119,7 @@ mod tests {
     #[test]
     fn detect_json_by_content_type() {
         let reg = ParserRegistry::with_defaults();
-        let p = reg
-            .detect_parser(b"{}", "application/json")
-            .unwrap();
+        let p = reg.detect_parser(b"{}", "application/json").unwrap();
         assert_eq!(p.id(), "json_generic");
     }
 
@@ -135,9 +133,7 @@ mod tests {
     #[test]
     fn detect_syslog_by_content_type() {
         let reg = ParserRegistry::with_defaults();
-        let p = reg
-            .detect_parser(b"<134>1 ...", "text/syslog")
-            .unwrap();
+        let p = reg.detect_parser(b"<134>1 ...", "text/syslog").unwrap();
         assert_eq!(p.id(), "syslog");
     }
 
@@ -154,7 +150,10 @@ mod tests {
     fn detect_syslog_by_heuristic() {
         let reg = ParserRegistry::with_defaults();
         let p = reg
-            .detect_parser(b"<134>1 2026-04-09T12:00:00Z host app - - msg", "text/plain")
+            .detect_parser(
+                b"<134>1 2026-04-09T12:00:00Z host app - - msg",
+                "text/plain",
+            )
             .unwrap();
         // JSON parser checks heuristic first but <134> doesn't start with { or [
         // Syslog parser checks heuristic and matches

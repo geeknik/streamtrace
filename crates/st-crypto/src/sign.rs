@@ -105,11 +105,11 @@ pub fn verify_signature(data: &[u8], signature: &DetachedSignature) -> Result<bo
         .try_into()
         .map_err(|_| "public key must be exactly 32 bytes".to_string())?;
 
-    let verifying_key = VerifyingKey::from_bytes(&pub_array)
-        .map_err(|e| format!("invalid public key: {e}"))?;
+    let verifying_key =
+        VerifyingKey::from_bytes(&pub_array).map_err(|e| format!("invalid public key: {e}"))?;
 
-    let sig_bytes = hex::decode(&signature.signature_hex)
-        .map_err(|e| format!("invalid signature hex: {e}"))?;
+    let sig_bytes =
+        hex::decode(&signature.signature_hex).map_err(|e| format!("invalid signature hex: {e}"))?;
 
     let sig_array: [u8; 64] = sig_bytes
         .try_into()

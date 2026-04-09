@@ -146,10 +146,7 @@ impl SequenceDetector {
                     if let Some(ref id) = actor.id {
                         let trimmed = id.trim();
                         if !trimmed.is_empty() {
-                            groups
-                                .entry(trimmed.to_string())
-                                .or_default()
-                                .push(event);
+                            groups.entry(trimmed.to_string()).or_default().push(event);
                         }
                     }
                 }
@@ -189,9 +186,7 @@ impl SequenceDetector {
             }
 
             // Try to start a match at `idx`.
-            if let Some(matched) =
-                self.try_match_from(pattern, events, idx, &total_dur)
-            {
+            if let Some(matched) = self.try_match_from(pattern, events, idx, &total_dur) {
                 // Record the end index so we skip consumed events.
                 let last_idx = matched.last().copied().unwrap_or(idx);
                 results.push(DetectedSequence {
@@ -225,7 +220,10 @@ impl SequenceDetector {
         let first_event = events[start_idx];
 
         // First step must match.
-        if !matches_event_type(&pattern.steps[0].event_type_pattern, &first_event.event_type) {
+        if !matches_event_type(
+            &pattern.steps[0].event_type_pattern,
+            &first_event.event_type,
+        ) {
             return None;
         }
 
@@ -369,7 +367,11 @@ mod tests {
         }
     }
 
-    fn make_event_at(event_type: &str, occurred_at: DateTime<Utc>, actor_id: Option<&str>) -> ForensicEvent {
+    fn make_event_at(
+        event_type: &str,
+        occurred_at: DateTime<Utc>,
+        actor_id: Option<&str>,
+    ) -> ForensicEvent {
         let mut event = ForensicEvent::new(
             Uuid::now_v7(),
             Uuid::now_v7(),
@@ -466,7 +468,11 @@ mod tests {
         let t0 = Utc::now();
         let events = vec![
             make_event_at("auth.login_failed", t0, Some("alice")),
-            make_event_at("auth.login_failed", t0 + Duration::seconds(5), Some("alice")),
+            make_event_at(
+                "auth.login_failed",
+                t0 + Duration::seconds(5),
+                Some("alice"),
+            ),
             make_event_at("auth.login", t0 + Duration::seconds(10), Some("alice")),
         ];
 
@@ -503,7 +509,11 @@ mod tests {
         let t0 = Utc::now();
         let events = vec![
             make_event_at("auth.login_failed", t0, Some("bob")),
-            make_event_at("auth.login_failed", t0 + Duration::seconds(120), Some("bob")),
+            make_event_at(
+                "auth.login_failed",
+                t0 + Duration::seconds(120),
+                Some("bob"),
+            ),
             make_event_at("auth.login", t0 + Duration::seconds(130), Some("bob")),
         ];
 
@@ -541,7 +551,11 @@ mod tests {
         let events = vec![
             make_event_at("auth.login_failed", t0, Some("alice")),
             make_event_at("auth.login_failed", t0 + Duration::seconds(1), Some("bob")),
-            make_event_at("auth.login_failed", t0 + Duration::seconds(2), Some("alice")),
+            make_event_at(
+                "auth.login_failed",
+                t0 + Duration::seconds(2),
+                Some("alice"),
+            ),
             make_event_at("auth.login", t0 + Duration::seconds(3), Some("alice")),
             make_event_at("auth.login", t0 + Duration::seconds(4), Some("bob")),
         ];
@@ -703,11 +717,17 @@ mod tests {
         assert!(patterns.iter().any(|p| p.name == "bad_deploy"));
 
         // data_exfiltration and brute_force_success require same_actor
-        let exfil = patterns.iter().find(|p| p.name == "data_exfiltration").unwrap();
+        let exfil = patterns
+            .iter()
+            .find(|p| p.name == "data_exfiltration")
+            .unwrap();
         assert!(exfil.same_actor);
         assert_eq!(exfil.steps.len(), 3);
 
-        let brute = patterns.iter().find(|p| p.name == "brute_force_success").unwrap();
+        let brute = patterns
+            .iter()
+            .find(|p| p.name == "brute_force_success")
+            .unwrap();
         assert!(brute.same_actor);
 
         let deploy = patterns.iter().find(|p| p.name == "bad_deploy").unwrap();

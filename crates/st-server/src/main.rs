@@ -6,7 +6,7 @@
 use std::sync::Arc;
 
 use clap::Parser;
-use st_api::{AppState, create_router_with_config};
+use st_api::{create_router_with_config, AppState};
 use st_cases::CaseManager;
 use st_common::config::AppConfig;
 use st_crypto::SigningKeyPair;
@@ -36,11 +36,10 @@ async fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     // Load layered configuration.
-    let mut config = AppConfig::load(&args.config_env)
-        .unwrap_or_else(|e| {
-            eprintln!("warning: failed to load config ({e}), using defaults");
-            AppConfig::default()
-        });
+    let mut config = AppConfig::load(&args.config_env).unwrap_or_else(|e| {
+        eprintln!("warning: failed to load config ({e}), using defaults");
+        AppConfig::default()
+    });
 
     // Apply CLI overrides.
     if let Some(port) = args.port {
@@ -136,12 +135,9 @@ async fn seed_dev_api_key(db: &Database) {
     let prefix = &token[..8]; // "dev-toke"
 
     // Check if a key with this prefix already exists.
-    match db.validate_api_key(prefix, token).await {
-        Ok(Some(_)) => {
-            tracing::info!("development API key already exists (prefix: {prefix})");
-            return;
-        }
-        Ok(None) | Err(_) => {}
+    if let Ok(Some(_)) = db.validate_api_key(prefix, token).await {
+        tracing::info!("development API key already exists (prefix: {prefix})");
+        return;
     }
 
     // Hash the token and create the key.
@@ -152,7 +148,10 @@ async fn seed_dev_api_key(db: &Database) {
                 st_common::types::Permission::Write,
                 st_common::types::Permission::Admin,
             ];
-            match db.create_api_key("development", &hash, prefix, permissions).await {
+            match db
+                .create_api_key("development", &hash, prefix, permissions)
+                .await
+            {
                 Ok(_key) => {
                     tracing::info!(
                         token = token,
@@ -180,9 +179,8 @@ async fn seed_dev_api_key(db: &Database) {
 fn load_signing_key() -> anyhow::Result<SigningKeyPair> {
     match std::env::var("ST_SIGNING_KEY_HEX") {
         Ok(hex_str) => {
-            let bytes = hex::decode(hex_str.trim()).map_err(|e| {
-                anyhow::anyhow!("ST_SIGNING_KEY_HEX contains invalid hex: {e}")
-            })?;
+            let bytes = hex::decode(hex_str.trim())
+                .map_err(|e| anyhow::anyhow!("ST_SIGNING_KEY_HEX contains invalid hex: {e}"))?;
             let secret: [u8; 32] = bytes.try_into().map_err(|v: Vec<u8>| {
                 anyhow::anyhow!(
                     "ST_SIGNING_KEY_HEX must be exactly 32 bytes (64 hex chars), got {} bytes",
@@ -207,8 +205,8 @@ fn load_signing_key() -> anyhow::Result<SigningKeyPair> {
 /// - `"json"` format: structured JSON output suitable for log aggregation.
 /// - Any other value: human-readable pretty output for development.
 fn init_tracing(config: &AppConfig) {
-    let env_filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new(&config.logging.level));
+    let env_filter =
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(&config.logging.level));
 
     let registry = tracing_subscriber::registry().with(env_filter);
 

@@ -364,9 +364,8 @@ impl Database {
         });
 
         let rows = match (entity_type, like_pattern.as_deref()) {
-            (Some(et), Some(pat)) => {
-                sqlx::query(
-                    r#"
+            (Some(et), Some(pat)) => sqlx::query(
+                r#"
                     SELECT id, entity_type, identifier, display_name,
                            first_seen_at, last_seen_at, event_count, attributes
                     FROM entities
@@ -374,17 +373,15 @@ impl Database {
                     ORDER BY last_seen_at DESC
                     LIMIT $3
                     "#,
-                )
-                .bind(et)
-                .bind(pat)
-                .bind(clamped_limit)
-                .fetch_all(&self.pool)
-                .await
-                .map_err(map_sqlx_err)?
-            }
-            (Some(et), None) => {
-                sqlx::query(
-                    r#"
+            )
+            .bind(et)
+            .bind(pat)
+            .bind(clamped_limit)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(map_sqlx_err)?,
+            (Some(et), None) => sqlx::query(
+                r#"
                     SELECT id, entity_type, identifier, display_name,
                            first_seen_at, last_seen_at, event_count, attributes
                     FROM entities
@@ -392,16 +389,14 @@ impl Database {
                     ORDER BY last_seen_at DESC
                     LIMIT $2
                     "#,
-                )
-                .bind(et)
-                .bind(clamped_limit)
-                .fetch_all(&self.pool)
-                .await
-                .map_err(map_sqlx_err)?
-            }
-            (None, Some(pat)) => {
-                sqlx::query(
-                    r#"
+            )
+            .bind(et)
+            .bind(clamped_limit)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(map_sqlx_err)?,
+            (None, Some(pat)) => sqlx::query(
+                r#"
                     SELECT id, entity_type, identifier, display_name,
                            first_seen_at, last_seen_at, event_count, attributes
                     FROM entities
@@ -409,28 +404,25 @@ impl Database {
                     ORDER BY last_seen_at DESC
                     LIMIT $2
                     "#,
-                )
-                .bind(pat)
-                .bind(clamped_limit)
-                .fetch_all(&self.pool)
-                .await
-                .map_err(map_sqlx_err)?
-            }
-            (None, None) => {
-                sqlx::query(
-                    r#"
+            )
+            .bind(pat)
+            .bind(clamped_limit)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(map_sqlx_err)?,
+            (None, None) => sqlx::query(
+                r#"
                     SELECT id, entity_type, identifier, display_name,
                            first_seen_at, last_seen_at, event_count, attributes
                     FROM entities
                     ORDER BY last_seen_at DESC
                     LIMIT $1
                     "#,
-                )
-                .bind(clamped_limit)
-                .fetch_all(&self.pool)
-                .await
-                .map_err(map_sqlx_err)?
-            }
+            )
+            .bind(clamped_limit)
+            .fetch_all(&self.pool)
+            .await
+            .map_err(map_sqlx_err)?,
         };
 
         Ok(rows.iter().map(entity_from_row).collect())

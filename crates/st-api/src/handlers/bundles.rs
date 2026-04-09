@@ -68,9 +68,7 @@ pub async fn verify_bundle_handler(
     auth.require_permission(Permission::Read)?;
 
     let bundle: EvidenceBundle = serde_json::from_value(raw).map_err(|e| {
-        ApiError::from(StError::Validation(format!(
-            "invalid evidence bundle: {e}"
-        )))
+        ApiError::from(StError::Validation(format!("invalid evidence bundle: {e}")))
     })?;
 
     let result = verify_bundle(&bundle);

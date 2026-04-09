@@ -13,4 +13,7 @@ pub mod validation;
 
 // Re-export the most commonly used items for ergonomic imports.
 pub use error::{StError, StResult};
-pub use types::{CaseId, CaseStatus, ContentHash, EventId, Permission, RawEventId, Severity, SortOrder, MAX_GRAPH_DEPTH};
+pub use types::{
+    CaseId, CaseStatus, ContentHash, EventId, Permission, RawEventId, Severity, SortOrder,
+    MAX_GRAPH_DEPTH,
+};

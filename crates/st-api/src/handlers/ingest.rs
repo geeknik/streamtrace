@@ -46,10 +46,8 @@ pub async fn ingest_events(
     // Validate source header lengths before processing.
     validate_source_headers(&headers)?;
 
-    let source_id = header_str(&headers, "x-source-id")
-        .unwrap_or(DEFAULT_SOURCE_ID);
-    let source_type = header_str(&headers, "x-source-type")
-        .unwrap_or(DEFAULT_SOURCE_TYPE);
+    let source_id = header_str(&headers, "x-source-id").unwrap_or(DEFAULT_SOURCE_ID);
+    let source_type = header_str(&headers, "x-source-type").unwrap_or(DEFAULT_SOURCE_TYPE);
     let source_name = header_str(&headers, "x-source-name");
 
     let result = state
@@ -107,12 +105,9 @@ pub async fn ingest_raw(
     // Validate source header lengths before processing.
     validate_source_headers(&headers)?;
 
-    let content_type = header_str(&headers, "content-type")
-        .unwrap_or("application/octet-stream");
-    let source_id = header_str(&headers, "x-source-id")
-        .unwrap_or(DEFAULT_SOURCE_ID);
-    let source_type = header_str(&headers, "x-source-type")
-        .unwrap_or(DEFAULT_SOURCE_TYPE);
+    let content_type = header_str(&headers, "content-type").unwrap_or("application/octet-stream");
+    let source_id = header_str(&headers, "x-source-id").unwrap_or(DEFAULT_SOURCE_ID);
+    let source_type = header_str(&headers, "x-source-type").unwrap_or(DEFAULT_SOURCE_TYPE);
     let source_name = header_str(&headers, "x-source-name");
     let parser_id = header_str(&headers, "x-parser-id");
 

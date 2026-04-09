@@ -11,7 +11,10 @@ pub fn verify_hash(data: &[u8], expected: &ContentHash) -> bool {
         HashAlgorithm::Blake3 => hash_blake3(data),
         HashAlgorithm::Sha256 => hash_sha256(data),
     };
-    constant_time_eq(computed.hex_digest.as_bytes(), expected.hex_digest.as_bytes())
+    constant_time_eq(
+        computed.hex_digest.as_bytes(),
+        expected.hex_digest.as_bytes(),
+    )
 }
 
 /// Verify that `data` hashes to `expected_hex` under BLAKE3.

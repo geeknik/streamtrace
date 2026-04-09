@@ -28,10 +28,7 @@ impl Database {
         parser_id: Option<&str>,
     ) -> StResult<RawEventId> {
         let byte_size = i32::try_from(content.len()).map_err(|_| {
-            StError::Validation(format!(
-                "content length {} exceeds i32 max",
-                content.len()
-            ))
+            StError::Validation(format!("content length {} exceeds i32 max", content.len()))
         })?;
 
         let row = sqlx::query(
@@ -83,10 +80,7 @@ impl Database {
     /// Fetches a raw event by its content hash (BLAKE3 hex digest).
     ///
     /// Returns `None` if no matching row exists. Used for deduplication.
-    pub async fn get_raw_event_by_hash(
-        &self,
-        content_hash: &str,
-    ) -> StResult<Option<RawEvent>> {
+    pub async fn get_raw_event_by_hash(&self, content_hash: &str) -> StResult<Option<RawEvent>> {
         let row = sqlx::query(
             r#"
             SELECT id, content, content_hash, content_type, source_id, source_type,
@@ -125,10 +119,7 @@ pub async fn insert_raw_event_tx(
     parser_id: Option<&str>,
 ) -> StResult<RawEventId> {
     let byte_size = i32::try_from(content.len()).map_err(|_| {
-        StError::Validation(format!(
-            "content length {} exceeds i32 max",
-            content.len()
-        ))
+        StError::Validation(format!("content length {} exceeds i32 max", content.len()))
     })?;
 
     let row = sqlx::query(

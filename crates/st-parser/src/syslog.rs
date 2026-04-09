@@ -37,10 +37,10 @@ fn priority_to_severity(pri: u32) -> Severity {
     let syslog_severity = pri & 0x07;
     match syslog_severity {
         0..=2 => Severity::Critical, // Emergency, Alert, Critical
-        3 => Severity::High,             // Error
-        4 => Severity::Medium,           // Warning
-        5 | 6 => Severity::Low,          // Notice, Informational
-        7 => Severity::Info,             // Debug
+        3 => Severity::High,         // Error
+        4 => Severity::Medium,       // Warning
+        5 | 6 => Severity::Low,      // Notice, Informational
+        7 => Severity::Info,         // Debug
         _ => Severity::Info,
     }
 }
@@ -227,10 +227,7 @@ fn extract_app_from_message(msg: &str) -> (Option<String>, String) {
                 .bytes()
                 .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_' || b == b'.')
         {
-            return (
-                Some(app.to_string()),
-                msg[colon_idx + 2..].to_string(),
-            );
+            return (Some(app.to_string()), msg[colon_idx + 2..].to_string());
         }
     }
     (None, msg.to_string())
@@ -238,8 +235,8 @@ fn extract_app_from_message(msg: &str) -> (Option<String>, String) {
 
 /// Parse a single syslog line into SyslogFields.
 fn parse_syslog_line(line: &str) -> Result<SyslogFields, StError> {
-    let (priority, rest) =
-        extract_priority(line).ok_or_else(|| StError::ParseError("missing syslog priority".to_string()))?;
+    let (priority, rest) = extract_priority(line)
+        .ok_or_else(|| StError::ParseError("missing syslog priority".to_string()))?;
 
     let mut fields = if let Some(f) = try_parse_rfc5424(rest) {
         f
@@ -346,11 +343,7 @@ impl EventParser for SyslogParser {
         false
     }
 
-    fn parse(
-        &self,
-        content: &[u8],
-        _content_type: &str,
-    ) -> Result<Vec<ParsedEvent>, StError> {
+    fn parse(&self, content: &[u8], _content_type: &str) -> Result<Vec<ParsedEvent>, StError> {
         if content.is_empty() {
             return Err(StError::ParseError("empty syslog input".to_string()));
         }
@@ -418,7 +411,10 @@ mod tests {
         let e = &events[0];
         assert_eq!(e.severity, Severity::Low); // 165 & 7 = 5 (Notice) -> Low
         assert_eq!(e.event_type, "syslog.sshd");
-        assert!(e.correlation_hints.iter().any(|h| h.key_type == CorrelationKeyType::Host && h.key_value == "router1"));
+        assert!(e
+            .correlation_hints
+            .iter()
+            .any(|h| h.key_type == CorrelationKeyType::Host && h.key_value == "router1"));
     }
 
     #[test]

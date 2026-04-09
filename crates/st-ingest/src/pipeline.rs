@@ -32,11 +32,7 @@ pub struct IngestPipeline {
 
 impl IngestPipeline {
     /// Creates a new ingestion pipeline.
-    pub fn new(
-        db: Arc<Database>,
-        parsers: Arc<ParserRegistry>,
-        config: IngestConfig,
-    ) -> Self {
+    pub fn new(db: Arc<Database>, parsers: Arc<ParserRegistry>, config: IngestConfig) -> Self {
         Self {
             db,
             parsers,
@@ -112,18 +108,12 @@ impl IngestPipeline {
         let mut event_ids = Vec::with_capacity(parsed_events.len());
 
         for parsed in &parsed_events {
-            let event = handler::normalize(
-                parsed,
-                raw_event_id,
-                source_id,
-                source_type,
-                source_name,
-            )?;
+            let event =
+                handler::normalize(parsed, raw_event_id, source_id, source_type, source_name)?;
 
             let keys = handler::extract_keys(&event, &parsed.correlation_hints);
 
-            let event_id =
-                handler::store_normalized_tx(&mut tx, &event, &keys).await?;
+            let event_id = handler::store_normalized_tx(&mut tx, &event, &keys).await?;
 
             // Step 7: Resolve entities (best-effort within the transaction --
             // log errors but do not fail the ingest since entity resolution

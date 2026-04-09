@@ -68,24 +68,14 @@ fn build_router(
             "/cases/{id}",
             get(handlers::cases::get_case).patch(handlers::cases::update_case),
         )
-        .route(
-            "/cases/{id}/events",
-            post(handlers::cases::add_case_event),
-        )
+        .route("/cases/{id}/events", post(handlers::cases::add_case_event))
         .route(
             "/cases/{id}/events/{event_id}",
-            delete(handlers::cases::remove_case_event)
-                .patch(handlers::cases::update_case_event),
+            delete(handlers::cases::remove_case_event).patch(handlers::cases::update_case_event),
         )
-        .route(
-            "/cases/{id}/export",
-            get(handlers::cases::export_case),
-        )
+        .route("/cases/{id}/export", get(handlers::cases::export_case))
         // Evidence bundle endpoints (Phase 3).
-        .route(
-            "/cases/{id}/bundle",
-            post(handlers::bundles::create_bundle),
-        )
+        .route("/cases/{id}/bundle", post(handlers::bundles::create_bundle))
         .route(
             "/bundles/verify",
             post(handlers::bundles::verify_bundle_handler),
@@ -95,14 +85,8 @@ fn build_router(
             "/holds",
             post(handlers::holds::create_hold).get(handlers::holds::list_holds),
         )
-        .route(
-            "/holds/{id}",
-            get(handlers::holds::get_hold),
-        )
-        .route(
-            "/holds/{id}/release",
-            post(handlers::holds::release_hold),
-        )
+        .route("/holds/{id}", get(handlers::holds::get_hold))
+        .route("/holds/{id}/release", post(handlers::holds::release_hold))
         .route(
             "/holds/{id}/materialize",
             post(handlers::holds::materialize_hold),
@@ -110,14 +94,8 @@ fn build_router(
         // Audit log endpoint (Phase 3).
         .route("/audit", get(handlers::audit::query_audit))
         // Entity endpoints.
-        .route(
-            "/entities",
-            get(handlers::entities::list_entities),
-        )
-        .route(
-            "/entities/{id}",
-            get(handlers::entities::get_entity),
-        )
+        .route("/entities", get(handlers::entities::list_entities))
+        .route("/entities/{id}", get(handlers::entities::get_entity))
         .route(
             "/entities/{id}/timeline",
             get(handlers::entities::get_entity_timeline),
@@ -144,10 +122,7 @@ fn build_router(
             "/sequences/detected",
             get(handlers::sequences::list_detected),
         )
-        .route(
-            "/sequences/scan",
-            post(handlers::sequences::scan),
-        );
+        .route("/sequences/scan", post(handlers::sequences::scan));
 
     // Log rate limit configuration. Actual enforcement should be done via
     // a reverse proxy (nginx, envoy) or a compatible tower middleware that

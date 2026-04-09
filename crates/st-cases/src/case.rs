@@ -122,26 +122,18 @@ impl CaseManager {
             "adding event to case"
         );
 
-        self.db
-            .add_event_to_case(case_id, event_id, added_by)
-            .await
+        self.db.add_event_to_case(case_id, event_id, added_by).await
     }
 
     /// Removes an event from a case.
-    pub async fn remove_event(
-        &self,
-        case_id: CaseId,
-        event_id: EventId,
-    ) -> StResult<()> {
+    pub async fn remove_event(&self, case_id: CaseId, event_id: EventId) -> StResult<()> {
         tracing::debug!(
             case_id = %case_id,
             event_id = %event_id,
             "removing event from case"
         );
 
-        self.db
-            .remove_event_from_case(case_id, event_id)
-            .await
+        self.db.remove_event_from_case(case_id, event_id).await
     }
 
     /// Updates the pin status and/or annotation of a case-event attachment.
@@ -178,11 +170,7 @@ impl CaseManager {
     ///
     /// Fetches the case and all associated events (including full event
     /// details), then renders them in the requested format.
-    pub async fn export(
-        &self,
-        case_id: CaseId,
-        format: ExportFormat,
-    ) -> StResult<String> {
+    pub async fn export(&self, case_id: CaseId, format: ExportFormat) -> StResult<String> {
         let case = self.db.get_case(case_id).await?;
         let case_events = self.db.get_case_events(case_id).await?;
 
@@ -261,7 +249,14 @@ impl CaseManager {
         tracing::info!(name, hold_type, created_by, "creating legal hold");
 
         self.db
-            .create_hold(name, description, hold_type, criteria, created_by, expires_at)
+            .create_hold(
+                name,
+                description,
+                hold_type,
+                criteria,
+                created_by,
+                expires_at,
+            )
             .await
     }
 

@@ -136,10 +136,7 @@ fn render_markdown(exported: &ExportedCase) -> String {
     // Title and metadata.
     out.push_str(&format!("# Investigation Report: {}\n\n", case.name));
 
-    out.push_str(&format!(
-        "**Status:** {}  \n",
-        status_display(case.status)
-    ));
+    out.push_str(&format!("**Status:** {}  \n", status_display(case.status)));
     out.push_str(&format!("**Created by:** {}  \n", case.created_by));
     out.push_str(&format!(
         "**Created at:** {}  \n",
@@ -311,10 +308,7 @@ mod tests {
 
         ExportedCase {
             case,
-            events: vec![CaseEventWithDetail {
-                case_event,
-                event,
-            }],
+            events: vec![CaseEventWithDetail { case_event, event }],
             exported_at: Utc::now(),
         }
     }

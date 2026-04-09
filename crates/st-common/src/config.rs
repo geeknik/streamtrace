@@ -143,9 +143,7 @@ impl AppConfig {
     pub fn load(env: &str) -> Result<Self, config::ConfigError> {
         let builder = config::Config::builder()
             .add_source(config::File::with_name("config/default").required(false))
-            .add_source(
-                config::File::with_name(&format!("config/{env}")).required(false),
-            )
+            .add_source(config::File::with_name(&format!("config/{env}")).required(false))
             .add_source(
                 config::Environment::with_prefix("ST")
                     .separator("__")
@@ -178,7 +176,10 @@ mod tests {
         let json = serde_json::to_string(&cfg).expect("serialize");
         let parsed: AppConfig = serde_json::from_str(&json).expect("deserialize");
         assert_eq!(parsed.server.port, cfg.server.port);
-        assert_eq!(parsed.database.max_connections, cfg.database.max_connections);
+        assert_eq!(
+            parsed.database.max_connections,
+            cfg.database.max_connections
+        );
         assert_eq!(
             parsed.security.cors_allowed_origins,
             cfg.security.cors_allowed_origins
