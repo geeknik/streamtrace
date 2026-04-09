@@ -202,7 +202,29 @@ proptest! {
 
 ### Parsers for new log formats
 
-The `st-parser` crate has a pluggable parser trait. Adding support for new formats (AWS CloudTrail, Azure Activity Log, Kubernetes audit log, Nginx access log, etc.) directly increases StreamTrace's usefulness.
+The `st-parser` crate has a pluggable parser trait. Adding support for new formats directly increases StreamTrace's usefulness. We provide a **complete parser template** and step-by-step guide to make this as easy as possible.
+
+**Getting started with a new parser:**
+
+1. Copy `crates/st-parser/src/template.rs` to a new file.
+2. Find/replace `TemplateParser` with your parser name.
+3. Find/replace `"template"` with your parser ID.
+4. Fill in the `// TODO:` sections with your format-specific logic.
+5. Register in `registry.rs`, add to `lib.rs`.
+6. Run `cargo test -p st-parser`.
+
+See the full **[Parser Guide](crates/st-parser/PARSERS.md)** for detailed instructions, field mapping reference, common patterns, and skeleton examples for AWS CloudTrail, Kubernetes audit logs, and Nginx access logs.
+
+Formats we would especially like to see:
+
+- AWS CloudTrail
+- Azure Activity Log
+- GCP Cloud Audit Logs
+- Kubernetes audit log
+- Nginx / Apache access logs
+- Okta system log
+- GitHub audit log
+- Zeek/Bro connection logs
 
 ### Correlation strategies
 

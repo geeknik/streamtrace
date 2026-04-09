@@ -27,6 +27,8 @@ tracing = { workspace = true }
 thiserror = { workspace = true }
 argon2 = { workspace = true }
 sqlx = { workspace = true }
+rand = { workspace = true }
+hex = "0.4"
 
 [dev-dependencies]
 http-body-util = "0.1"

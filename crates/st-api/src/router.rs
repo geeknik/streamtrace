@@ -122,7 +122,10 @@ fn build_router(
             "/sequences/detected",
             get(handlers::sequences::list_detected),
         )
-        .route("/sequences/scan", post(handlers::sequences::scan));
+        .route("/sequences/scan", post(handlers::sequences::scan))
+        // API key management (admin only).
+        .route("/admin/keys", post(handlers::keys::create_key))
+        .route("/admin/keys/{id}", delete(handlers::keys::revoke_key));
 
     // Log rate limit configuration. Actual enforcement should be done via
     // a reverse proxy (nginx, envoy) or a compatible tower middleware that

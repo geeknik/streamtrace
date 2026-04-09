@@ -9,6 +9,7 @@ pub mod events;
 pub mod health;
 pub mod holds;
 pub mod ingest;
+pub mod keys;
 pub mod replay;
 pub mod search;
 pub mod sequences;

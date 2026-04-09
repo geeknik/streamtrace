@@ -198,6 +198,15 @@ pub async fn build_evidence_bundle(
 
     let case_events: Vec<_> = case_event_rows.iter().map(case_event_from_row).collect();
 
+    // Guard against unbounded memory usage: reject cases with too many events.
+    const MAX_BUNDLE_EVENTS: usize = 500;
+    if case_events.len() > MAX_BUNDLE_EVENTS {
+        return Err(StError::Validation(format!(
+            "case has {} events, maximum for bundle generation is {MAX_BUNDLE_EVENTS}",
+            case_events.len()
+        )));
+    }
+
     let mut events_json: Vec<serde_json::Value> = Vec::with_capacity(case_events.len());
     let mut raw_entries: Vec<RawBundleEntry> = Vec::with_capacity(case_events.len());
     let mut integrity: Vec<FileIntegrity> = Vec::new();

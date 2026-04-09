@@ -375,6 +375,7 @@ We want:
 * performance improvements
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, standards, and workflow.
+See [Parser Guide](crates/st-parser/PARSERS.md) for step-by-step instructions on adding support for your log format.
 
 ---
 

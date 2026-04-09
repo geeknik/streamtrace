@@ -415,33 +415,33 @@ impl Database {
             query = query.bind(*ts).bind(*uid);
         }
 
-        if has_event_types {
-            query = query.bind(params.event_types.as_ref().unwrap());
+        if let Some(ref event_types) = params.event_types {
+            if !event_types.is_empty() {
+                query = query.bind(event_types);
+            }
         }
-        if has_actor {
-            query = query.bind(params.actor_id.as_ref().unwrap());
+        if let Some(ref actor_id) = params.actor_id {
+            query = query.bind(actor_id);
         }
-        if has_source {
-            query = query.bind(params.source_id.as_ref().unwrap());
+        if let Some(ref source_id) = params.source_id {
+            query = query.bind(source_id);
         }
-        if has_severity {
-            query = query.bind(severity_to_i16(params.severity_min.unwrap()));
+        if let Some(severity_min) = params.severity_min {
+            query = query.bind(severity_to_i16(severity_min));
         }
-        if has_src_ip {
-            query = query.bind(params.src_ip.as_ref().unwrap());
+        if let Some(ref src_ip) = params.src_ip {
+            query = query.bind(src_ip);
         }
-        if has_search {
-            query = query.bind(params.search.as_ref().unwrap());
+        if let Some(ref search) = params.search {
+            if !search.is_empty() {
+                query = query.bind(search);
+            }
         }
-        if has_tags {
-            let tags_ref: Vec<&str> = params
-                .tags
-                .as_ref()
-                .unwrap()
-                .iter()
-                .map(|s| s.as_str())
-                .collect();
-            query = query.bind(tags_ref);
+        if let Some(ref tags) = params.tags {
+            if !tags.is_empty() {
+                let tags_ref: Vec<&str> = tags.iter().map(|s| s.as_str()).collect();
+                query = query.bind(tags_ref);
+            }
         }
 
         let rows = query.fetch_all(&self.pool).await.map_err(map_sqlx_err)?;
