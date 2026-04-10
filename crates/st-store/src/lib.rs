@@ -79,14 +79,22 @@ impl Database {
     }
 
     /// Runs sqlx migrations from the workspace `migrations/` directory.
+    ///
+    /// Uses the runtime `Migrator` API (not the `migrate!` macro) to avoid
+    /// pulling in `sqlx-macros-core` which transitively depends on `sqlx-mysql`
+    /// and the vulnerable `rsa` crate (RUSTSEC-2023-0071).
     pub async fn migrate(&self) -> StResult<()> {
-        sqlx::migrate!("../../migrations")
-            .run(&self.pool)
+        let migrator = sqlx::migrate::Migrator::new(std::path::Path::new("migrations"))
             .await
             .map_err(|e| {
-                tracing::error!(error = %e, "database migration failed");
-                StError::Database(format!("migration failed: {e}"))
+                tracing::error!(error = %e, "failed to load migrations");
+                StError::Database(format!("migration load failed: {e}"))
             })?;
+
+        migrator.run(&self.pool).await.map_err(|e| {
+            tracing::error!(error = %e, "database migration failed");
+            StError::Database(format!("migration failed: {e}"))
+        })?;
 
         tracing::info!("database migrations applied successfully");
         Ok(())

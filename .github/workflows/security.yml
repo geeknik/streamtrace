@@ -8,11 +8,14 @@ name: Security Audit
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   schedule:
     - cron: "0 6 * * 1"  # Monday 06:00 UTC
 
 permissions:
   contents: read
+  checks: write  # required by rustsec/audit-check to post results
 
 jobs:
   rust-audit:
